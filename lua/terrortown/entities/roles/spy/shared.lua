@@ -53,9 +53,9 @@ else
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
 		if ply and not ply:HasTeam(TEAM_TRAITOR) then return end
 
-		for spy, tmp in pairs(tbl) do
+		for spy in pairs(tbl) do
 			if spy:IsActive() and spy:GetSubRole() == ROLE_SPY then
-				tmp[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
+				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
 			end
 		end
 	end)
