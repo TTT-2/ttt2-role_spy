@@ -76,4 +76,28 @@ else
 			end
 		end
 	end)
+
+	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
+		if tm == TEAM_TRAITOR then
+			for _, spy in ipairs(player.GetAll()) do
+				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+					sender:ChatPrint("You are not able to chat until every Spy is dead!")
+
+					return false
+				end
+			end
+		end
+	end)
+
+	hook.Add("TTT2AvoidTeamVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, listener)
+		if IsValid(speaker) and speaker:HasTeam(TEAM_TRAITOR) then
+			for _, spy in ipairs(player.GetAll()) do
+				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+					speaker:ChatPrint("You are not able to use the voice chat until every Spy is dead!")
+
+					return false
+				end
+			end
+		end
+	end)
 end
