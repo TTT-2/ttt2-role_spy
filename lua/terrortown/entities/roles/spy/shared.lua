@@ -20,7 +20,8 @@ ROLE.conVarData = {
 	maximum = 2, -- maximum amount of roles in a round
 	minPlayers = 7, -- minimum amount of players until this role is able to get selected
 	credits = 1, -- the starting credits of a specific role
-	togglable = true -- option to toggle a role for a client if possible (F1 menu)
+	togglable = true, -- option to toggle a role for a client if possible (F1 menu)
+	shopFallback = SHOP_FALLBACK_TRAITOR
 }
 
 -- now link this subrole with its baserole
