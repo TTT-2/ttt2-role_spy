@@ -65,4 +65,14 @@ else
 			return ROLE_TRAITOR
 		end
 	end)
+
+	hook.Add("TTT2TellTraitors", "TTT2SpyModifyStartingTraitors", function(traitornames)
+		if traitornames then
+			for _, spy in ipairs(player.GetAll()) do
+				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+					traitornames[#traitornames + 1] = spy:Nick()
+				end
+			end
+		end
+	end)
 end
