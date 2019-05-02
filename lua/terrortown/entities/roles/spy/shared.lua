@@ -128,8 +128,6 @@ else
 			end
 		end
 
-		print(traitor_alive)
-
 		if traitor_alive <= 1 then
 			for _, ply in ipairs(player.GetAll()) do
 				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll then
