@@ -100,4 +100,48 @@ else
 			end
 		end
 	end)
+
+	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)	
+		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then	
+			corpse.was_role = ROLE_TRAITOR
+			corpse.role_color = GetRoleByIndex(ROLE_TRAITOR).color
+			corpse.is_spy_corpse = true
+		end
+		
+	end)
+
+	hook.Add("TTTBodyFound", "TTT2SpyChangeRoleToTraitor", function(_, confirmed, corpse)	
+		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then			
+			SendRoleListMessage(ROLE_TRAITOR, TEAM_TRAITOR, {confirmed:EntIndex()})
+		end
+	end)
+
+	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)	
+		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
+			return
+		end
+
+		local traitor_alive = 0
+		for _, ply in ipairs(player.GetAll()) do
+			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
+				traitor_alive = traitor_alive + 1
+			end
+		end
+
+		print(traitor_alive)
+
+		if traitor_alive <= 1 then
+			for _, ply in ipairs(player.GetAll()) do
+				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll then
+					local spy_corpse = ply.server_ragdoll
+					spy_corpse.was_role = ROLE_SPY
+					spy_corpse.role_color = GetRoleByIndex(ROLE_SPY).color
+					spy_corpse.is_spy_corpse = false
+					spy_corpse.reverted_spy = true
+
+					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
+				end
+			end
+		end
+	end)
 end
