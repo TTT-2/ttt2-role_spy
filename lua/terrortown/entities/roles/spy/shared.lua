@@ -171,7 +171,7 @@ else
 		end
 	end)
 
-	hook.Add("TTT2ConfirmPlayer", "TTT2SpyGetRoleBackIfLastTraitor", function(confirmed, finder, corpse)	
+	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)	
 		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
 		
 		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
