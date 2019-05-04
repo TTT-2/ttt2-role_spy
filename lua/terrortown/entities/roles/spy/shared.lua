@@ -159,15 +159,19 @@ else
 		
 	end)
 
-	hook.Add("TTTBodyFound", "TTT2SpyChangeRoleToTraitor", function(_, confirmed, corpse)	
+	hook.Add("TTT2ConfirmPlayer", "TTT2SpyChangeRoleToTraitor", function(confirmed, finder, corpse)	
 		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
-		
-		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then			
+			
+		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then	
+			confirmed:ConfirmPlayer(true)
 			SendRoleListMessage(ROLE_TRAITOR, TEAM_TRAITOR, {confirmed:EntIndex()})
+			SCORE:HandleBodyFound(finder, confirmed)
+
+			return false	
 		end
 	end)
 
-	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)	
+	hook.Add("TTT2ConfirmPlayer", "TTT2SpyGetRoleBackIfLastTraitor", function(confirmed, finder, corpse)	
 		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
 		
 		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
@@ -190,9 +194,12 @@ else
 					spy_corpse.is_spy_corpse = false
 					spy_corpse.reverted_spy = true
 
+					confirmed:ConfirmPlayer(true)
 					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
+					SCORE:HandleBodyFound(finder, confirmed)
 				end
 			end
+			return false
 		end
 	end)
 end
