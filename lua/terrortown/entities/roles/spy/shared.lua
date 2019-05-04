@@ -194,12 +194,9 @@ else
 					spy_corpse.is_spy_corpse = false
 					spy_corpse.reverted_spy = true
 
-					confirmed:ConfirmPlayer(true)
 					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
-					SCORE:HandleBodyFound(finder, confirmed)
 				end
 			end
-			return false
 		end
 	end)
 end
