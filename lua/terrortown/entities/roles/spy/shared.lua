@@ -2,6 +2,8 @@ if SERVER then
 	AddCSLuaFile()
 
 	resource.AddFile("materials/vgui/ttt/dynamic/roles/icon_spy.vmt")
+
+	util.AddNetworkString("TTT2SpyFakeMessage")
 end
 
 ROLE.color = Color(255, 127, 80, 255) -- ...
@@ -49,6 +51,10 @@ if CLIENT then
 		LANG.AddToLanguage("Deutsch", "search_role_" .. SPY.abbr, "Diese Person war ein Spion!")
 		LANG.AddToLanguage("Deutsch", "target_" .. SPY.name, "Spion")
 		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. SPY.name, [[Der Spion ist ein besserer Unschuldiger (oder sogar ein besserer Detektiv), denn er hat seinen eigenen ([C]) Shop. Versuche, die Unschuldigen zu beschützen!]])
+	end)
+
+	net.Receive("TTT2SpyFakeMessage", function()
+		MSTACK:AddColoredBgMessage("You succefully faked an equipment purchase.", LocalPlayer():GetRoleColor())
 	end)
 else
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
@@ -101,6 +107,33 @@ else
 		end
 	end)
 
+	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
+		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY then
+			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
+				local is_item = items.IsItem(id)
+				
+				local traitors = {}
+
+				for _, ply in pairs(player.GetAll()) do
+					if IsValid(ply) and ply:IsActive() and ply:IsTraitor() then
+						table.insert(traitors, ply)
+					end
+				end
+
+				net.Start("TEBN_ItemBought")
+				net.WriteEntity(spy)
+				net.WriteString(id)
+				net.WriteBool(is_item)
+				net.Send(traitors)
+			end
+
+			net.Start("TTT2SpyFakeMessage")
+			net.Send(spy)
+
+			return false
+		end
+	end)
+
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)	
 		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then	
 			corpse.was_role = ROLE_TRAITOR
@@ -140,6 +173,5 @@ else
 					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
 				end
 			end
-		end
 	end)
 end
