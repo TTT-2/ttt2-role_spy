@@ -26,6 +26,18 @@ ROLE.conVarData = {
 	shopFallback = SHOP_FALLBACK_TRAITOR
 }
 
+CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
+	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
+
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
+end)
+
 -- now link this subrole with its baserole
 hook.Add("TTT2BaseRoleInit", "TTT2ConBRIWithSpy", function()
 	SPY:SetBaseRole(ROLE_INNOCENT)
@@ -108,6 +120,8 @@ else
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
+		if not GetConVar("ttt2_spy_fake_buy"):GetBool() then return end
+
 		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY then
 			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
 				local is_item = items.IsItem(id)
@@ -135,6 +149,8 @@ else
 	end)
 
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		
 		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then	
 			corpse.was_role = ROLE_TRAITOR
 			corpse.role_color = GetRoleByIndex(ROLE_TRAITOR).color
@@ -144,12 +160,16 @@ else
 	end)
 
 	hook.Add("TTTBodyFound", "TTT2SpyChangeRoleToTraitor", function(_, confirmed, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		
 		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then			
 			SendRoleListMessage(ROLE_TRAITOR, TEAM_TRAITOR, {confirmed:EntIndex()})
 		end
 	end)
 
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
+		
 		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
 			return
 		end
@@ -161,7 +181,7 @@ else
 			end
 		end
 
-		if traitor_alive <= 1 then
+		if traitor_alive <= 0 then
 			for _, ply in ipairs(player.GetAll()) do
 				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll then
 					local spy_corpse = ply.server_ragdoll
@@ -173,5 +193,6 @@ else
 					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
 				end
 			end
+		end
 	end)
 end
