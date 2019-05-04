@@ -79,6 +79,31 @@ else
 		end
 	end)
 
+	--we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
+	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleDeadSpyMod", function(ply, tbl)
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or GetRoundState() == ROUND_POST then return end
+
+		--check if traitors are dead and reveal
+		if GetConVar("ttt2_spy_reveal_true_role"):GetBool() then
+			local traitor_alive = 0
+
+			for tr in pairs(tbl) do
+				if tr:IsTerror() and tr:Alive() and (tr:GetBaseRole() == ROLE_TRAITOR or tr:GetSubRole() == ROLE_SPY) then
+					traitor_alive = traitor_alive + 1
+				end
+			end
+
+			if traitor_alive <= 0 then return end 
+		end
+
+		for spy in pairs(tbl) do
+			if not spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
+			end
+		end
+	end)
+
+
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
 			return ROLE_TRAITOR
@@ -96,6 +121,8 @@ else
 	end)
 
 	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
 				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
@@ -120,8 +147,6 @@ else
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
-		if not GetConVar("ttt2_spy_fake_buy"):GetBool() then return end
-
 		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY then
 			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
 				local is_item = items.IsItem(id)
