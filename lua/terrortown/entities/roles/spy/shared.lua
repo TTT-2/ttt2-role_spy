@@ -26,6 +26,18 @@ ROLE.conVarData = {
 	shopFallback = SHOP_FALLBACK_TRAITOR
 }
 
+CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
+	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
+
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
+end)
+
 -- now link this subrole with its baserole
 hook.Add("TTT2BaseRoleInit", "TTT2ConBRIWithSpy", function()
 	SPY:SetBaseRole(ROLE_INNOCENT)
@@ -67,6 +79,31 @@ else
 		end
 	end)
 
+	--we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
+	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleDeadSpyMod", function(ply, tbl)
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or GetRoundState() == ROUND_POST then return end
+
+		--check if traitors are dead and reveal
+		if GetConVar("ttt2_spy_reveal_true_role"):GetBool() then
+			local traitor_alive = 0
+
+			for tr in pairs(tbl) do
+				if tr:IsTerror() and tr:Alive() and (tr:GetBaseRole() == ROLE_TRAITOR or tr:GetSubRole() == ROLE_SPY) then
+					traitor_alive = traitor_alive + 1
+				end
+			end
+
+			if traitor_alive <= 0 then return end 
+		end
+
+		for spy in pairs(tbl) do
+			if not spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
+			end
+		end
+	end)
+
+
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
 			return ROLE_TRAITOR
@@ -84,6 +121,8 @@ else
 	end)
 
 	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
 				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
@@ -131,6 +170,58 @@ else
 			net.Send(spy)
 
 			return false
+		end
+	end)
+
+	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		
+		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then	
+			corpse.was_role = ROLE_TRAITOR
+			corpse.role_color = GetRoleByIndex(ROLE_TRAITOR).color
+			corpse.is_spy_corpse = true
+		end
+		
+	end)
+
+	hook.Add("TTT2ConfirmPlayer", "TTT2SpyChangeRoleToTraitor", function(confirmed, finder, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+			
+		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then	
+			confirmed:ConfirmPlayer(true)
+			SendRoleListMessage(ROLE_TRAITOR, TEAM_TRAITOR, {confirmed:EntIndex()})
+			SCORE:HandleBodyFound(finder, confirmed)
+
+			return false	
+		end
+	end)
+
+	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)	
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
+		
+		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
+			return
+		end
+
+		local traitor_alive = 0
+		for _, ply in ipairs(player.GetAll()) do
+			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
+				traitor_alive = traitor_alive + 1
+			end
+		end
+
+		if traitor_alive <= 0 then
+			for _, ply in ipairs(player.GetAll()) do
+				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll then
+					local spy_corpse = ply.server_ragdoll
+					spy_corpse.was_role = ROLE_SPY
+					spy_corpse.role_color = GetRoleByIndex(ROLE_SPY).color
+					spy_corpse.is_spy_corpse = false
+					spy_corpse.reverted_spy = true
+
+					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
+				end
+			end
 		end
 	end)
 end
