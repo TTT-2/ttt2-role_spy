@@ -212,7 +212,7 @@ else
 
 		if traitor_alive <= 0 then
 			for _, ply in ipairs(player.GetAll()) do
-				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll then
+				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll and ply:GetNWBool("body_found", false) then
 					local spy_corpse = ply.server_ragdoll
 					spy_corpse.was_role = ROLE_SPY
 					spy_corpse.role_color = GetRoleByIndex(ROLE_SPY).color
