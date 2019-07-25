@@ -70,7 +70,7 @@ if CLIENT then
 	end)
 else
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
-		if ply and not ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_BODYGUARD or GetRoundState() == ROUND_POST then return end
+		if ply and not ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
 
 		for spy in pairs(tbl) do
 			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
