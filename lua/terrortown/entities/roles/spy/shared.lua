@@ -147,7 +147,7 @@ else
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
-		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY then
+		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY and GetConVar("ttt2_spy_fake_buy"):GetBool() then
 			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
 				local is_item = items.IsItem(id)
 
