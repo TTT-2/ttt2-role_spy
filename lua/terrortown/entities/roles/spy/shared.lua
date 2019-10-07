@@ -10,41 +10,30 @@ ROLE.color = Color(255, 127, 80, 255) -- ...
 ROLE.dkcolor = Color(189, 61, 14, 255) -- ...
 ROLE.bgcolor = Color(55, 176, 121, 255) -- ...
 ROLE.abbr = "spy" -- abbreviation
-ROLE.defaultTeam = TEAM_INNOCENT -- the team name: roles with same team name are working together
-ROLE.defaultEquipment = SPECIAL_EQUIPMENT -- here you can set up your own default equipment
 ROLE.surviveBonus = 0 -- bonus multiplier for every survive while another player was killed
 ROLE.scoreKillsMultiplier = 1 -- multiplier for kill of player of another team
 ROLE.scoreTeamKillsMultiplier = -8 -- multiplier for teamkill
 ROLE.unknownTeam = true -- player don't know their teammates
 
-ROLE.conVarData = {
-	pct = 0.15, -- necessary: percentage of getting this role selected (per player)
-	maximum = 2, -- maximum amount of roles in a round
-	minPlayers = 7, -- minimum amount of players until this role is able to get selected
-	credits = 1, -- the starting credits of a specific role
-	togglable = true, -- option to toggle a role for a client if possible (F1 menu)
-	shopFallback = SHOP_FALLBACK_TRAITOR
-}
 
-CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+function ROLE:PreInitialize()
+	self.defaultTeam = TEAM_INNOCENT
+	self.defaultEquipment = SPECIAL_EQUIPMENT
 
-hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
-	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
+	self.conVarData = {
+		pct = 0.15, -- necessary: percentage of getting this role selected (per player)
+		maximum = 2, -- maximum amount of roles in a round
+		minPlayers = 7, -- minimum amount of players until this role is able to get selected
+		credits = 1, -- the starting credits of a specific role
+		togglable = true, -- option to toggle a role for a client if possible (F1 menu)
+		shopFallback = SHOP_FALLBACK_TRAITOR
+	}
+end
 
-	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
-	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
-	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
-end)
+function ROLE:Initialize()
+	roles.SetBaseRole(self, ROLE_INNOCENT)
 
--- now link this subrole with its baserole
-hook.Add("TTT2BaseRoleInit", "TTT2ConBRIWithSpy", function()
-	SPY:SetBaseRole(ROLE_INNOCENT)
-end)
-
-if CLIENT then
-	hook.Add("TTT2FinishedLoading", "SpyInitT", function()
+	if CLIENT then
 		-- Role specific language elements
 		LANG.AddToLanguage("English", SPY.name, "SPY")
 		LANG.AddToLanguage("English", "info_popup_" .. SPY.name, [[You are a spy! A spy plays in the innocent team but is shown to the traitos as their mate to confuse them.]])
@@ -59,8 +48,22 @@ if CLIENT then
 		LANG.AddToLanguage("Deutsch", "search_role_" .. SPY.abbr, "Diese Person war ein Spion!")
 		LANG.AddToLanguage("Deutsch", "target_" .. SPY.name, "Spion")
 		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. SPY.name, [[]])
-	end)
+	end
+end)
 
+CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
+	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
+
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
+end)
+
+if CLIENT then
 	net.Receive("TTT2SpyFakeMessage", function()
 		MSTACK:AddColoredBgMessage("You succefully faked an equipment purchase.", LocalPlayer():GetRoleColor())
 	end)
