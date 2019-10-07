@@ -6,17 +6,17 @@ if SERVER then
 	util.AddNetworkString("TTT2SpyFakeMessage")
 end
 
-ROLE.color = Color(255, 127, 80, 255) -- ...
-ROLE.dkcolor = Color(189, 61, 14, 255) -- ...
-ROLE.bgcolor = Color(55, 176, 121, 255) -- ...
-ROLE.abbr = "spy" -- abbreviation
-ROLE.surviveBonus = 0 -- bonus multiplier for every survive while another player was killed
-ROLE.scoreKillsMultiplier = 1 -- multiplier for kill of player of another team
-ROLE.scoreTeamKillsMultiplier = -8 -- multiplier for teamkill
-ROLE.unknownTeam = true -- player don't know their teammates
-
-
 function ROLE:PreInitialize()
+	self.color = Color(255, 127, 80, 255)
+	self.dkcolor = Color(189, 61, 14, 255)
+	self.bgcolor = Color(55, 176, 121, 255)
+
+	self.abbr = "spy"
+	self.surviveBonus = 0
+	self.scoreKillsMultiplier = 1
+	self.scoreTeamKillsMultiplier = -8
+	self.unknownTeam = true
+
 	self.defaultTeam = TEAM_INNOCENT
 	self.defaultEquipment = SPECIAL_EQUIPMENT
 
