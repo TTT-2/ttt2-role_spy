@@ -49,7 +49,7 @@ function ROLE:Initialize()
 		LANG.AddToLanguage("Deutsch", "target_" .. SPY.name, "Spion")
 		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. SPY.name, [[]])
 	end
-end)
+end
 
 CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
