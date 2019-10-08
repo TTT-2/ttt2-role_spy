@@ -51,10 +51,6 @@ function ROLE:Initialize()
 	end
 end
 
-CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-
 hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
 
@@ -68,6 +64,10 @@ if CLIENT then
 		MSTACK:AddColoredBgMessage("You succefully faked an equipment purchase.", LocalPlayer():GetRoleColor())
 	end)
 else
+	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
 		if ply and not ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
 
@@ -80,10 +80,10 @@ else
 
 	--we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleDeadSpyMod", function(ply, tbl)
-		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or GetRoundState() == ROUND_POST then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() or GetRoundState() == ROUND_POST then return end
 
 		--check if traitors are dead and reveal
-		if GetConVar("ttt2_spy_reveal_true_role"):GetBool() then
+		if ttt2_spy_reveal_true_role:GetBool() then
 			local traitor_alive = 0
 
 			for tr in pairs(tbl) do
@@ -120,7 +120,7 @@ else
 	end)
 
 	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
-		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
@@ -146,15 +146,15 @@ else
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
-		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY and GetConVar("ttt2_spy_fake_buy"):GetBool() then
+		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY and ttt2_spy_fake_buy:GetBool() then
 			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
 				local is_item = items.IsItem(id)
 
 				local traitors = {}
 
-				for _, ply in pairs(player.GetAll()) do
-					if IsValid(ply) and ply:IsActive() and ply:IsTraitor() then
-						table.insert(traitors, ply)
+				for _, ply in ipairs(player.GetAll()) do
+					if ply:IsActive() and ply:IsTraitor() then
+						traitors[#traitors + 1] = ply
 					end
 				end
 
@@ -173,18 +173,17 @@ else
 	end)
 
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)
-		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
 		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
 			corpse.role_color = GetRoleByIndex(ROLE_TRAITOR).color
 			corpse.is_spy_corpse = true
 		end
-
 	end)
 
 	hook.Add("TTT2ConfirmPlayer", "TTT2SpyChangeRoleToTraitor", function(confirmed, finder, corpse)
-		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
 		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then
 			confirmed:ConfirmPlayer(true)
@@ -196,13 +195,12 @@ else
 	end)
 
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)
-		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_reveal_true_role:GetBool() then return end
 
-		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then
-			return
-		end
+		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
 		local traitor_alive = 0
+		
 		for _, ply in ipairs(player.GetAll()) do
 			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
 				traitor_alive = traitor_alive + 1
