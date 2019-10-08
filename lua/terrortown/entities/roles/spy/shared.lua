@@ -57,6 +57,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
 
 if CLIENT then
@@ -67,18 +68,32 @@ else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
+	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
 		if ply and not ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
+
+		local spySelected = false
 
 		for spy in pairs(tbl) do
 			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
 				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
+				
+				spySelected = true
+			end
+		end
+		
+		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
+		
+		for traitor in pairs(tbl) do
+			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
+				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
 			end
 		end
 	end)
 
-	--we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
+	-- we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleDeadSpyMod", function(ply, tbl)
 		if not ttt2_spy_confirm_as_traitor:GetBool() or GetRoundState() == ROUND_POST then return end
 
@@ -95,9 +110,21 @@ else
 			if traitor_alive <= 0 then return end
 		end
 
+		local spySelected = false
+
 		for spy in pairs(tbl) do
 			if not spy:Alive() and spy:GetSubRole() == ROLE_SPY then
 				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
+				
+				spySelected = true
+			end
+		end
+		
+		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
+		
+		for traitor in pairs(tbl) do
+			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
+				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
 			end
 		end
 	end)
