@@ -87,6 +87,8 @@ else
 		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
 		
 		for traitor in pairs(tbl) do
+			if traitor == ply then continue end
+			
 			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
 				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
 			end
@@ -123,6 +125,8 @@ else
 		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
 		
 		for traitor in pairs(tbl) do
+			if traitor == ply then continue end
+			
 			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
 				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
 			end
