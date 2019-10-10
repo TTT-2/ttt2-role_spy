@@ -207,7 +207,7 @@ else
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)
 		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
-		if corpse and (corpse.was_role == ROLE_SPY or corpse.was_team == TEAM_TRAITOR) and not corpse.reverted_spy then
+		if corpse and (corpse.was_role == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and corpse.was_team == TEAM_TRAITOR) and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
 			corpse.role_color = TRAITOR.color
 			corpse.is_spy_corpse = true
@@ -247,7 +247,7 @@ else
 				
 				local ply_corpse = ply.server_ragdoll
 				
-				if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
+				if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetTeam() == TEAM_TRAITOR then
 					local subrole = ply:GetSubRole()
 					local srd = ply:GetSubRoleData()
 					
