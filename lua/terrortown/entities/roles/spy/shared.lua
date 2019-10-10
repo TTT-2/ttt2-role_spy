@@ -241,11 +241,11 @@ else
 			end
 		end
 
-		if traitor_alive then
+		if not traitor_alive then
 			for _, ply in ipairs(player.GetAll()) do
-				if not ply.server_ragdoll or not ply:GetNWBool("body_found", false) then continue end
-				
 				local ply_corpse = ply.server_ragdoll
+				
+				if not ply_corpse or not ply:GetNWBool("body_found", false) then continue end
 				
 				if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
 					local subrole = ply:GetSubRole()
