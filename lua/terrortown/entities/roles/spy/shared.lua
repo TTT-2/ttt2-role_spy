@@ -57,7 +57,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
-	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles_test", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
 
 if CLIENT then
@@ -68,7 +68,7 @@ else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles_test", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
@@ -89,8 +89,8 @@ else
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
 			
-			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
-				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
+			if traitor:IsTerror() and traitor:Alive() and traitor:GetTeam() == TEAM_TRAITOR then
+				tbl[traitor] = {ROLE_TRAITOR, TEAM_TRAITOR}
 			end
 		end
 	end)
@@ -101,15 +101,17 @@ else
 
 		--check if traitors are dead and reveal
 		if ttt2_spy_reveal_true_role:GetBool() then
-			local traitor_alive = 0
+			local traitor_alive = false
 
 			for tr in pairs(tbl) do
 				if tr:IsTerror() and tr:Alive() and (tr:GetBaseRole() == ROLE_TRAITOR or tr:GetSubRole() == ROLE_SPY) then
-					traitor_alive = traitor_alive + 1
+					traitor_alive = true
+					
+					break
 				end
 			end
 
-			if traitor_alive <= 0 then return end
+			if not traitor_alive then return end
 		end
 
 		local spySelected = false
@@ -127,12 +129,11 @@ else
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
 			
-			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
-				tbl[traitor] = {ROLE_TRAITOR, traitor:GetTeam()}
+			if not traitor:Alive() and traitor:GetTeam() == TEAM_TRAITOR then
+				tbl[traitor] = {ROLE_TRAITOR, TEAM_TRAITOR}
 			end
 		end
 	end)
-
 
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
@@ -206,9 +207,9 @@ else
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)
 		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
-		if corpse and corpse.was_role == ROLE_SPY and not corpse.reverted_spy then
+		if corpse and (corpse.was_role == ROLE_SPY or corpse.was_team == TEAM_TRAITOR) and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
-			corpse.role_color = GetRoleByIndex(ROLE_TRAITOR).color
+			corpse.role_color = TRAITOR.color
 			corpse.is_spy_corpse = true
 		end
 	end)
@@ -230,24 +231,32 @@ else
 
 		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
-		local traitor_alive = 0
+		local traitor_alive = false
 		
 		for _, ply in ipairs(player.GetAll()) do
 			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
-				traitor_alive = traitor_alive + 1
+				traitor_alive = true
+				
+				break
 			end
 		end
 
-		if traitor_alive <= 0 then
+		if traitor_alive then
 			for _, ply in ipairs(player.GetAll()) do
-				if ply:GetSubRole() == ROLE_SPY and ply.server_ragdoll and ply:GetNWBool("body_found", false) then
-					local spy_corpse = ply.server_ragdoll
-					spy_corpse.was_role = ROLE_SPY
-					spy_corpse.role_color = GetRoleByIndex(ROLE_SPY).color
-					spy_corpse.is_spy_corpse = false
-					spy_corpse.reverted_spy = true
+				if not ply.server_ragdoll or not ply:GetNWBool("body_found", false) then continue end
+				
+				local ply_corpse = ply.server_ragdoll
+				
+				if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
+					local subrole = ply:GetSubRole()
+					local srd = ply:GetSubRoleData()
+					
+					ply_corpse.was_role = subrole
+					ply_corpse.role_color = srd.color
+					ply_corpse.is_spy_corpse = false
+					ply_corpse.reverted_spy = true
 
-					SendRoleListMessage(ROLE_SPY, TEAM_INNOCENT, {ply:EntIndex()})
+					SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
 				end
 			end
 		end
