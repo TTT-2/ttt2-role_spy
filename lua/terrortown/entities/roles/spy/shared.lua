@@ -57,7 +57,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
-	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles_test", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
 
 if CLIENT then
