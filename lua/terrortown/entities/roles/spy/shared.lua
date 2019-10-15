@@ -68,7 +68,7 @@ else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles_test", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
 	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
