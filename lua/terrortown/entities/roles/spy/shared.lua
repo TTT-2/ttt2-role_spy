@@ -134,6 +134,27 @@ else
 			end
 		end
 	end)
+	
+	hook.Add("TTT2OverrideDisabledSync", "TTT2ModifyTraitorRoles4Spy", function(ply, target)
+		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_jam_special_roles:GetBool() or GetRoundState() == ROUND_POST then return end
+		
+		local plys = player.GetAll()
+		local spySelected = false
+		
+		for i = 1, #plys do
+			if plys[i]:GetSubRole() == ROLE_SPY then
+				spySelected = true
+				
+				break
+			end
+		end
+		
+		if not spySelected then return end
+		
+		if ply:HasTeam(TEAM_TRAITOR) and target:GetBaseRole() == ROLE_TRAITOR then
+			return true
+		end
+	end)
 
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
