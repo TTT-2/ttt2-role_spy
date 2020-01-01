@@ -8,8 +8,6 @@ end
 
 function ROLE:PreInitialize()
 	self.color = Color(255, 127, 80, 255)
-	self.dkcolor = Color(189, 61, 14, 255)
-	self.bgcolor = Color(55, 176, 121, 255)
 
 	self.abbr = "spy"
 	self.surviveBonus = 0
@@ -79,16 +77,16 @@ else
 		for spy in pairs(tbl) do
 			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
 				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
-				
+
 				spySelected = true
 			end
 		end
-		
+
 		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
-		
+
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
-			
+
 			if traitor:IsTerror() and traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
 				tbl[traitor] = {ROLE_TRAITOR, TEAM_TRAITOR}
 			end
@@ -106,7 +104,7 @@ else
 			for tr in pairs(tbl) do
 				if tr:IsTerror() and tr:Alive() and (tr:GetBaseRole() == ROLE_TRAITOR or tr:GetSubRole() == ROLE_SPY) then
 					traitor_alive = true
-					
+
 					break
 				end
 			end
@@ -119,38 +117,38 @@ else
 		for spy in pairs(tbl) do
 			if not spy:Alive() and spy:GetSubRole() == ROLE_SPY then
 				tbl[spy] = {ROLE_TRAITOR, TEAM_TRAITOR}
-				
+
 				spySelected = true
 			end
 		end
-		
+
 		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
-		
+
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
-			
+
 			if not traitor:Alive() and traitor:GetBaseRole() == ROLE_TRAITOR then
 				tbl[traitor] = {ROLE_TRAITOR, TEAM_TRAITOR}
 			end
 		end
 	end)
-	
+
 	hook.Add("TTT2OverrideDisabledSync", "TTT2ModifyTraitorRoles4Spy", function(ply, target)
 		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_jam_special_roles:GetBool() or GetRoundState() == ROUND_POST then return end
-		
+
 		local plys = player.GetAll()
 		local spySelected = false
-		
+
 		for i = 1, #plys do
 			if plys[i]:GetSubRole() == ROLE_SPY then
 				spySelected = true
-				
+
 				break
 			end
 		end
-		
+
 		if not spySelected then return end
-		
+
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetBaseRole() == ROLE_TRAITOR then
 			return true
 		end
@@ -252,33 +250,27 @@ else
 
 		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
-		local traitor_alive = false
-		
 		for _, ply in ipairs(player.GetAll()) do
 			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
-				traitor_alive = true
-				
-				break
+				return
 			end
 		end
 
-		if not traitor_alive then
-			for _, ply in ipairs(player.GetAll()) do
-				local ply_corpse = ply.server_ragdoll
-				
-				if not ply_corpse or not ply:GetNWBool("body_found", false) then continue end
-				
-				if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
-					local subrole = ply:GetSubRole()
-					local srd = ply:GetSubRoleData()
-					
-					ply_corpse.was_role = subrole
-					ply_corpse.role_color = srd.color
-					ply_corpse.is_spy_corpse = false
-					ply_corpse.reverted_spy = true
+		for _, ply in ipairs(player.GetAll()) do
+			local ply_corpse = ply.server_ragdoll
 
-					SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
-				end
+			if not ply_corpse or not ply:GetNWBool("body_found", false) then continue end
+
+			if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
+				local subrole = ply:GetSubRole()
+				local srd = ply:GetSubRoleData()
+
+				ply_corpse.was_role = subrole
+				ply_corpse.role_color = srd.color
+				ply_corpse.is_spy_corpse = false
+				ply_corpse.reverted_spy = true
+
+				SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
 			end
 		end
 	end)
