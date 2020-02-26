@@ -167,14 +167,17 @@ else
 		end
 	end)
 
-	hook.Add("TTT2AvoidTeamVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, listener)
-		if IsValid(speaker) and speaker:HasTeam(TEAM_TRAITOR) then
-			for _, spy in ipairs(player.GetAll()) do
-				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-					speaker:ChatPrint("You are not able to use the voice chat until every Spy is dead!")
+	hook.Add("TTT2CanUseVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, isTeamVoice)
 
-					return false
-				end
+		-- only jam traitor team voice
+		if not isTeamVoice or not IsValid(speaker) or not speaker:HasTeam(TEAM_TRAITOR) then return end
+
+		-- ToDo prevent team voice overlay from showing on the speaking players screen
+		for _, spy in ipairs(player.GetAll()) do
+			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+				LANG.Msg(speaker, "ttt2_teamvoice_jammed_spy", nil, MSG_CHAT_WARN)
+
+				return false
 			end
 		end
 	end)
