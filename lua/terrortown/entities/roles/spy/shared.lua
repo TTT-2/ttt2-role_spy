@@ -30,23 +30,6 @@ end
 
 function ROLE:Initialize()
 	roles.SetBaseRole(self, ROLE_INNOCENT)
-
-	if CLIENT then
-		-- Role specific language elements
-		LANG.AddToLanguage("English", SPY.name, "SPY")
-		LANG.AddToLanguage("English", "info_popup_" .. SPY.name, [[You are a spy! A spy plays in the innocent team but is shown to the traitos as their mate to confuse them.]])
-		LANG.AddToLanguage("English", "body_found_" .. SPY.abbr, "They were a spy!")
-		LANG.AddToLanguage("English", "search_role_" .. SPY.abbr, "This person was a spy!")
-		LANG.AddToLanguage("English", "target_" .. SPY.name, "Spy")
-		LANG.AddToLanguage("English", "ttt2_desc_" .. SPY.name, [[]])
-
-		LANG.AddToLanguage("Deutsch", SPY.name, "Spion")
-		LANG.AddToLanguage("Deutsch", "info_popup_" .. SPY.name, [[Du bist ein Spion! Ein Spion spielt im Team der Unschuldigen, wird Verrätern aber als Kollege angezeigt um diese zu verwirren.]])
-		LANG.AddToLanguage("Deutsch", "body_found_" .. SPY.abbr, "Er war ein Spion!")
-		LANG.AddToLanguage("Deutsch", "search_role_" .. SPY.abbr, "Diese Person war ein Spion!")
-		LANG.AddToLanguage("Deutsch", "target_" .. SPY.name, "Spion")
-		LANG.AddToLanguage("Deutsch", "ttt2_desc_" .. SPY.name, [[]])
-	end
 end
 
 hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
@@ -176,7 +159,7 @@ else
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
 				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-					sender:ChatPrint("You are not able to chat until every Spy is dead!")
+					LANG.Msg(sender, "ttt2_teamchat_jammed_spy", nil, MSG_CHAT_WARN)
 
 					return false
 				end
