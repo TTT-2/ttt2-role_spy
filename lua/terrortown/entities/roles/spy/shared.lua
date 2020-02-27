@@ -40,12 +40,30 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 end)
 
 if CLIENT then
+	hook.Add("TTT2CanUseVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, isTeamVoice)
 
+		-- only jam traitor team voice
+		if not isTeamVoice or not IsValid(speaker) or not speaker:HasTeam(TEAM_TRAITOR) or TTT2NET:GetGlobal("all_spies_dead") then return end
+
+		LANG.Msg("ttt2_teamvoice_jammed_" .. SPY.name, nil, MSG_CHAT_WARN)
+
+		return false
+	end)
 else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+
+	hook.Add("TTTBeginRound", "TTT2Check4Spy", function()
+		for _, spy in ipairs(player.GetAll()) do
+			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
+
+				TTT2NET:SetGlobal("all_spies_dead", {type = "bool"}, false)
+			return end
+		end
+		TTT2NET:SetGlobal("all_spies_dead", {type = "bool"}, true)
+	end)
 
 	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
@@ -150,32 +168,19 @@ else
 	end)
 
 	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
-		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
+		if not ttt2_spy_confirm_as_traitor:GetBool() or not tm == TEAM_TRAITOR or TTT2NET:GetGlobal("all_spies_dead") then return end
 
-		if tm == TEAM_TRAITOR then
-			for _, spy in ipairs(player.GetAll()) do
-				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-					LANG.Msg(sender, "ttt2_teamchat_jammed_" .. SPY.name, nil, MSG_CHAT_WARN)
+		LANG.Msg(sender, "ttt2_teamchat_jammed_" .. SPY.name, nil, MSG_CHAT_WARN)
 
-					return false
-				end
-			end
-		end
+		return false
 	end)
 
 	hook.Add("TTT2CanUseVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, isTeamVoice)
 
 		-- only jam traitor team voice
-		if not isTeamVoice or not IsValid(speaker) or not speaker:HasTeam(TEAM_TRAITOR) then return end
+		if not isTeamVoice or not IsValid(speaker) or not speaker:HasTeam(TEAM_TRAITOR) or TTT2NET:GetGlobal("all_spies_dead") then return end
 
-		-- ToDo prevent team voice overlay from showing on the speaking players screen
-		for _, spy in ipairs(player.GetAll()) do
-			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-				LANG.Msg(speaker, "ttt2_teamvoice_jammed_" .. SPY.name , nil, MSG_CHAT_WARN)
-
-				return false
-			end
-		end
+		return false
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
@@ -254,5 +259,29 @@ else
 				SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
 			end
 		end
+	end)
+
+	hook.Add("TTT2PostPlayerDeath", "SpyPostPlayerDeath", function(ply, inflictor, killer)
+
+		if ply:GetSubRole() ~= ROLE_SPY then return end
+
+		for _, spy in ipairs(player.GetAll()) do
+			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then return end
+		end
+
+		TTT2NET:SetGlobal("all_spies_dead", {type = "bool"}, true)
+	end)
+
+	hook.Add("TTT2UpdateSubrole", "SpyUpdateSubrole", function(ply, old, new)
+		if old ~= ROLE_SPY and (new ~= ROLE_SPY or not TTT2NET:GetGlobal("all_spies_dead")) then return end
+
+		if old == ROLE_SPY then
+			for _, spy in ipairs(player.GetAll()) do
+				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then return end
+			end
+			TTT2NET:SetGlobal("all_spies_dead", {type = "bool"}, true)
+		return end
+
+		TTT2NET:SetGlobal("all_spies_dead", {type = "bool"}, false)
 	end)
 end
