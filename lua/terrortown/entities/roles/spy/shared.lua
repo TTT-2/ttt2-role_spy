@@ -2,8 +2,6 @@ if SERVER then
 	AddCSLuaFile()
 
 	resource.AddFile("materials/vgui/ttt/dynamic/roles/icon_spy.vmt")
-
-	util.AddNetworkString("TTT2SpyFakeMessage")
 end
 
 function ROLE:PreInitialize()
@@ -42,9 +40,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 end)
 
 if CLIENT then
-	net.Receive("TTT2SpyFakeMessage", function()
-		MSTACK:AddColoredBgMessage("You succefully faked an equipment purchase.", LocalPlayer():GetRoleColor())
-	end)
+
 else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
@@ -159,7 +155,7 @@ else
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
 				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-					LANG.Msg(sender, "ttt2_teamchat_jammed_spy", nil, MSG_CHAT_WARN)
+					LANG.Msg(sender, "ttt2_teamchat_jammed_" .. SPY.name, nil, MSG_CHAT_WARN)
 
 					return false
 				end
@@ -175,7 +171,7 @@ else
 		-- ToDo prevent team voice overlay from showing on the speaking players screen
 		for _, spy in ipairs(player.GetAll()) do
 			if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
-				LANG.Msg(speaker, "ttt2_teamvoice_jammed_spy", nil, MSG_CHAT_WARN)
+				LANG.Msg(speaker, "ttt2_teamvoice_jammed_" .. SPY.name , nil, MSG_CHAT_WARN)
 
 				return false
 			end
@@ -202,8 +198,7 @@ else
 				net.Send(traitors)
 			end
 
-			net.Start("TTT2SpyFakeMessage")
-			net.Send(spy)
+			LANG.Msg(spy, "ttt2_fakebuy_success_" .. SPY.name, nil, MSG_MSTACK_ROLE)
 
 			return false
 		end

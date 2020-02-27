@@ -11,3 +11,4 @@ L["ttt2_desc_" .. SPY.name] = [[]]
 -- OTHER ROLE LANGUAGE STRINGS
 L["ttt2_teamchat_jammed_" .. SPY.name] = "Du kannst nicht mit deinem Team schreiben solange nicht alle Spione tot sind!"
 L["ttt2_teamvoice_jammed_" .. SPY.name] = "Du kannst nicht mit deinem Team reden solange nicht alle Spione tot sind!"
+L["ttt2_fakebuy_success_" .. SPY.name] = "Du hast erfolgreich einen Ausrüstungskauf vorgetäuscht!"
