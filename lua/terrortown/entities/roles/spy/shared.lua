@@ -35,6 +35,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_fake_buy", checkbox = true, desc = "Spies are only allowed to fake purchases (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_as_traitor", checkbox = true, desc = "Spies will be confirmed as traitor (Def. 1)"})
+	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_confirm_team_traitor", checkbox = true, desc = "Spies will be confirmed as team traitor (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_reveal_true_role", checkbox = true, desc = "Spies role will be revealed after every traitors death (Def. 1)"})
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
@@ -44,6 +45,7 @@ if CLIENT then
 else
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
+	local ttt2_spy_confirm_team_traitor = CreateConVar("ttt2_spy_confirm_team_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 
@@ -211,6 +213,7 @@ else
 			corpse.was_role = ROLE_TRAITOR
 			corpse.role_color = TRAITOR.color
 			corpse.is_spy_corpse = true
+			corpse.was_team = ttt2_spy_confirm_team_traitor:GetBool() and TEAM_TRAITOR or TEAM_INNOCENT
 		end
 	end)
 
