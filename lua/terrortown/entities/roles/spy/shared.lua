@@ -39,9 +39,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
 
-if CLIENT then
-
-else
+if SERVER then
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
@@ -229,7 +227,7 @@ else
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)
 		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_reveal_true_role:GetBool() then return end
 
-		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
+		if IsValid(confirmed) and not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
 		for _, ply in ipairs(player.GetAll()) do
 			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
