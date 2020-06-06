@@ -133,7 +133,7 @@ if SERVER then
 
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
-			return ROLE_TRAITOR
+			return ROLE_TRAITOR, TEAM_TRAITOR
 		end
 	end)
 
