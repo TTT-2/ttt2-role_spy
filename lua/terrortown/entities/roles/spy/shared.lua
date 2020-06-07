@@ -207,6 +207,7 @@ if SERVER then
 
 		if corpse and (corpse.was_role == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and roles.GetByIndex(corpse.was_role):GetBaseRole() == ROLE_TRAITOR) and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
+			corpse.was_team = TEAM_TRAITOR
 			corpse.role_color = TRAITOR.color
 			corpse.is_spy_corpse = true
 		end
@@ -242,14 +243,16 @@ if SERVER then
 
 			if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
 				local subrole = ply:GetSubRole()
+				local team = ply:GetTeam()
 				local srd = ply:GetSubRoleData()
 
 				ply_corpse.was_role = subrole
+				ply_corpse.was_team = team
 				ply_corpse.role_color = srd.color
 				ply_corpse.is_spy_corpse = false
 				ply_corpse.reverted_spy = true
 
-				SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
+				SendRoleListMessage(subrole, team, {ply:EntIndex()})
 			end
 		end
 	end)
