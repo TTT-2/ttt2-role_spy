@@ -136,7 +136,10 @@ else
 	hook.Add("TTTCOverrideTeamSync", "TTTCModifyTeamSync4Spy", function(ply, tbl)
 		if ply:GetSubRole() ~= ROLE_SPY or GetRoundState() ~= ROUND_ACTIVE then return end
 
-		for _, v in ipairs(player.GetAll()) do
+		local plys = player.GetAll()
+
+		for i = 1, #plys do
+			local v = plys[i]
 			if not v:HasTeam(TEAM_TRAITOR) or v:GetSubRoleData().unknownTeam then continue end
 
 			table.insert(tbl, v)
