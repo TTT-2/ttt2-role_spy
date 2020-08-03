@@ -40,9 +40,7 @@ hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
 	table.insert(tbl[ROLE_SPY], {cvar = "ttt2_spy_jam_special_roles", checkbox = true, desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"})
 end)
 
-if CLIENT then
-
-else
+if SERVER then
 	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
 	local ttt2_spy_confirm_team_traitor = CreateConVar("ttt2_spy_confirm_team_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
@@ -137,7 +135,7 @@ else
 
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
-			return ROLE_TRAITOR
+			return ROLE_TRAITOR, TEAM_TRAITOR
 		end
 	end)
 
@@ -211,6 +209,7 @@ else
 
 		if corpse and (corpse.was_role == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and roles.GetByIndex(corpse.was_role):GetBaseRole() == ROLE_TRAITOR) and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
+			corpse.was_team = TEAM_TRAITOR
 			corpse.role_color = TRAITOR.color
 			corpse.is_spy_corpse = true
 			corpse.was_team = ttt2_spy_confirm_team_traitor:GetBool() and TEAM_TRAITOR or TEAM_INNOCENT
@@ -232,7 +231,7 @@ else
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)
 		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_reveal_true_role:GetBool() then return end
 
-		if not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
+		if IsValid(confirmed) and not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
 		for _, ply in ipairs(player.GetAll()) do
 			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
@@ -247,14 +246,16 @@ else
 
 			if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
 				local subrole = ply:GetSubRole()
+				local team = ply:GetTeam()
 				local srd = ply:GetSubRoleData()
 
 				ply_corpse.was_role = subrole
+				ply_corpse.was_team = team
 				ply_corpse.role_color = srd.color
 				ply_corpse.is_spy_corpse = false
 				ply_corpse.reverted_spy = true
 
-				SendRoleListMessage(subrole, ply:GetTeam(), {ply:EntIndex()})
+				SendRoleListMessage(subrole, team, {ply:EntIndex()})
 			end
 		end
 	end)
