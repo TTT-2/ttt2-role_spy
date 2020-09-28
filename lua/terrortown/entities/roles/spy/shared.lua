@@ -216,6 +216,19 @@ if SERVER then
 	end)
 
 	hook.Add("TTTCanSearchCorpse", "TTT2SpyChangeCorpseToTraitor", function(ply, corpse)
+		local plys = player.GetAll()
+		local spySelected = false
+
+		for i = 1, #plys do
+			if plys[i]:GetSubRole() == ROLE_SPY then
+				spySelected = true
+
+				break
+			end
+		end
+
+		if not spySelected then return end
+
 		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
 
 		if corpse and (corpse.was_role == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and roles.GetByIndex(corpse.was_role):GetBaseRole() == ROLE_TRAITOR) and not corpse.reverted_spy then
