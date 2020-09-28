@@ -131,6 +131,19 @@ if SERVER then
 		end
 	end)
 
+	hook.Add("TTTCOverrideTeamSync", "TTTCModifyTeamSync4Spy", function(ply, tbl)
+		if ply:GetSubRole() ~= ROLE_SPY or GetRoundState() ~= ROUND_ACTIVE then return end
+
+		local plys = player.GetAll()
+
+		for i = 1, #plys do
+			local v = plys[i]
+			if not v:HasTeam(TEAM_TRAITOR) or v:GetSubRoleData().unknownTeam then continue end
+
+			table.insert(tbl, v)
+		end
+	end)
+
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
 		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
 			return ROLE_TRAITOR, TEAM_TRAITOR
