@@ -161,8 +161,6 @@ if SERVER then
 	end)
 
 	hook.Add("TTT2AvoidTeamChat", "TTT2SpyJamTraitorChat", function(sender, tm, msg)
-		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
-
 		if tm == TEAM_TRAITOR then
 			for _, spy in ipairs(player.GetAll()) do
 				if spy:IsTerror() and spy:Alive() and spy:GetSubRole() == ROLE_SPY then
