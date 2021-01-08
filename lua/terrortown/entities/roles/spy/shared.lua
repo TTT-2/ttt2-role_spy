@@ -243,7 +243,7 @@ if SERVER then
 		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then
 			confirmed:ConfirmPlayer(true)
 			SendRoleListMessage(ROLE_TRAITOR, TEAM_TRAITOR, {confirmed:EntIndex()})
-			SCORE:HandleBodyFound(finder, confirmed)
+			events.Trigger(EVENT_BODYFOUND, finder, corpse)
 
 			return false
 		end
