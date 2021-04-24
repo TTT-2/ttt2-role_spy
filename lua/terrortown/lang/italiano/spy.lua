@@ -13,3 +13,8 @@ Può far finta di comprare da uno shop apposito.]]
 L["ttt2_teamchat_jammed_" .. SPY.name] = "Non puoi chattare con la tua squadra finché ci sono Spie in vita!"
 L["ttt2_teamvoice_jammed_" .. SPY.name] = "Non puoi usare la chat vocale della squadra finché ci sono Spie in vita!"
 L["ttt2_fakebuy_success_" .. SPY.name] = "Hai fatto finta di comprare un oggetto con successo!"
+
+--L["tooltip_spy_alive_score"] = "Spy alive: {score}"
+--L["spy_alive_score"] = "Spy alive:"
+--L["title_event_spy_alive"] = "Spy survived"
+--L["desc_event_spy_alive"] = "The Spy has survived the round and tricked the Traitors."

@@ -12,3 +12,8 @@ L["ttt2_desc_" .. SPY.name] = [[]]
 L["ttt2_teamchat_jammed_" .. SPY.name] = "Vous ne pouvez pas utiliser le chat de votre équipe tant que tous les Espions ne sont pas morts!"
 L["ttt2_teamvoice_jammed_" .. SPY.name] = "Vous ne pouvez pas utiliser le chat vocal de votre équipe tant que tous les Espions ne sont pas morts!"
 L["ttt2_fakebuy_success_" .. SPY.name] = "Vous avez réussi à faire un faux achat d'équipement!"
+
+--L["tooltip_spy_alive_score"] = "Spy alive: {score}"
+--L["spy_alive_score"] = "Spy alive:"
+--L["title_event_spy_alive"] = "Spy survived"
+--L["desc_event_spy_alive"] = "The Spy has survived the round and tricked the Traitors."

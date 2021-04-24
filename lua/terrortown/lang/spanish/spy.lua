@@ -13,3 +13,8 @@ tienda falsa para confundir a tus compañeros. Además, tu presencia hará que l
 L["ttt2_teamchat_jammed_" .. SPY.name] = "¡No puedes hablar por el chat de equipo hasta que el Espía esté muerto!"
 L["ttt2_teamvoice_jammed_" .. SPY.name] = "¡No puedes usar el chat de voz hasta que el Espía esté muerto!"
 L["ttt2_fakebuy_success_" .. SPY.name] = "¡Has hecho una compra falsa con éxito!"
+
+--L["tooltip_spy_alive_score"] = "Spy alive: {score}"
+--L["spy_alive_score"] = "Spy alive:"
+--L["title_event_spy_alive"] = "Spy survived"
+--L["desc_event_spy_alive"] = "The Spy has survived the round and tricked the Traitors."
