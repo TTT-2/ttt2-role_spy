@@ -8,20 +8,19 @@ function ROLE:PreInitialize()
 	self.color = Color(255, 127, 80, 255)
 
 	self.abbr = "spy"
-	self.surviveBonus = 0
-	self.scoreKillsMultiplier = 1
-	self.scoreTeamKillsMultiplier = -8
+	self.score.killsMultiplier = 2
+	self.score.teamKillsMultiplier = -8
 	self.unknownTeam = true
 
 	self.defaultTeam = TEAM_INNOCENT
 	self.defaultEquipment = SPECIAL_EQUIPMENT
 
 	self.conVarData = {
-		pct = 0.15, -- necessary: percentage of getting this role selected (per player)
-		maximum = 2, -- maximum amount of roles in a round
-		minPlayers = 7, -- minimum amount of players until this role is able to get selected
-		credits = 1, -- the starting credits of a specific role
-		togglable = true, -- option to toggle a role for a client if possible (F1 menu)
+		pct = 0.15,
+		maximum = 2,
+		minPlayers = 7,
+		credits = 1,
+		togglable = true,
 		shopFallback = SHOP_FALLBACK_TRAITOR
 	}
 end
