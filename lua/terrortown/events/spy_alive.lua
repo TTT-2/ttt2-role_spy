@@ -64,7 +64,6 @@ hook.Add("TTT2AddedEvent", "trigger_spy_survival_event", function(type)
 	if type ~= EVENT_FINISH then return end
 
 	local plys = util.GetAlivePlayers()
-	local wasSpy = false
 	for i = 1, #plys do
 		if plys[1]:GetSubRole() == ROLE_SPY then
 			events.Trigger(EVENT_SPY_ALIVE)
