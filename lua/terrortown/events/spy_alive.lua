@@ -1,5 +1,10 @@
 EVENT.base = "base_event"
 
+if SERVER then
+	AddCSLuaFile()
+	resource.AddFile("materials/vgui/ttt/vskin/events/spy_alive.vmt")
+end
+
 if CLIENT then
 	EVENT.icon = Material("vgui/ttt/vskin/events/spy_alive")
 	EVENT.title = "title_event_spy_alive"
@@ -58,5 +63,13 @@ end
 hook.Add("TTT2AddedEvent", "trigger_spy_survival_event", function(type)
 	if type ~= EVENT_FINISH then return end
 
-	events.Trigger(EVENT_SPY_ALIVE)
+	local plys = util.GetAlivePlayers()
+	local wasSpy = false
+	for i = 1, #plys do
+		if plys[1]:GetSubRole() == ROLE_SPY then
+			events.Trigger(EVENT_SPY_ALIVE)
+			return
+		end
+	end
+
 end)
