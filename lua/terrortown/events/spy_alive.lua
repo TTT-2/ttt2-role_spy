@@ -1,7 +1,6 @@
 EVENT.base = "base_event"
 
 if SERVER then
-	AddCSLuaFile()
 	resource.AddFile("materials/vgui/ttt/vskin/events/spy_alive.vmt")
 end
 
