@@ -21,6 +21,7 @@ if SERVER then
 	function EVENT:Trigger()
 		local plys = player.GetAll()
 		local eventPlys = {}
+		local spyAlive = false
 
 		for i = 1, #plys do
 			local ply = plys[i]
@@ -36,7 +37,12 @@ if SERVER then
 				nick = ply:Nick(),
 				sid64 = ply:SteamID64()
 			}
+
+			-- only add this event if a spy is alive
+			spyAlive = true
 		end
+
+		if not spyAlive then return end
 
 		return self:Add({plys = eventPlys})
 	end
@@ -61,19 +67,6 @@ end
 -- trigger this event once the round ended but before the events are synced
 hook.Add("TTT2AddedEvent", "trigger_spy_survival_event", function(type)
 	if type ~= EVENT_FINISH then return end
-
-	local plys = util.GetAlivePlayers()
-	local spyAlive = false
-
-	for i = 1, #plys do
-		if plys[1]:GetSubRole() ~= ROLE_SPY then continue end
-
-		spyAlive = true
-
-		break
-	end
-
-	if not spyAlive then return end
 
 	events.Trigger(EVENT_SPY_ALIVE)
 end)
