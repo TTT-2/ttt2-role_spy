@@ -1,5 +1,9 @@
 EVENT.base = "base_event"
 
+if SERVER then
+	resource.AddFile("materials/vgui/ttt/vskin/events/spy_alive.vmt")
+end
+
 if CLIENT then
 	EVENT.icon = Material("vgui/ttt/vskin/events/spy_alive")
 	EVENT.title = "title_event_spy_alive"
@@ -17,6 +21,7 @@ if SERVER then
 	function EVENT:Trigger()
 		local plys = player.GetAll()
 		local eventPlys = {}
+		local spyAlive = false
 
 		for i = 1, #plys do
 			local ply = plys[i]
@@ -32,7 +37,12 @@ if SERVER then
 				nick = ply:Nick(),
 				sid64 = ply:SteamID64()
 			}
+
+			-- only add this event if a spy is alive
+			spyAlive = true
 		end
+
+		if not spyAlive then return end
 
 		return self:Add({plys = eventPlys})
 	end
