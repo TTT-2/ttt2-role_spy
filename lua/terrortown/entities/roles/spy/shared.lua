@@ -203,7 +203,7 @@ if SERVER then
 	hook.Add("TTT2CanUseVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, isTeamVoice)
 
 		-- only jam traitor team voice
-		if not isTeamVoice or not IsValid(speaker) or not speaker:GetTeam() == TEAM_TRAITOR then return end
+		if not isTeamVoice or not IsValid(speaker) or speaker:GetTeam() ~= TEAM_TRAITOR then return end
 
 		-- ToDo prevent team voice overlay from showing on the speaking players screen
 		for _, spy in ipairs(player.GetAll()) do
