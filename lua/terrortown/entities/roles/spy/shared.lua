@@ -75,7 +75,7 @@ if SERVER then
 
 	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
-		if ply and not ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
+		if ply and ply:GetTeam() ~= TEAM_TRAITOR or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
 
 		local spySelected = false
 
@@ -154,7 +154,7 @@ if SERVER then
 
 		if not spySelected then return end
 
-		if ply:HasTeam(TEAM_TRAITOR) and target:GetBaseRole() == ROLE_TRAITOR then
+		if ply:GetTeam() == TEAM_TRAITOR and target:GetBaseRole() == ROLE_TRAITOR then
 			return true
 		end
 	end)
@@ -166,14 +166,14 @@ if SERVER then
 
 		for i = 1, #plys do
 			local v = plys[i]
-			if not v:HasTeam(TEAM_TRAITOR) or v:GetSubRoleData().unknownTeam then continue end
+			if v:GetTeam() ~= TEAM_TRAITOR or v:GetSubRoleData().unknownTeam then continue end
 
 			table.insert(tbl, v)
 		end
 	end)
 
 	hook.Add("TTT2ModifyRadarRole", "TTT2ModifyRadarRole4Spy", function(ply, target)
-		if ply:HasTeam(TEAM_TRAITOR) and target:GetSubRole() == ROLE_SPY then
+		if ply:GetTeam() == TEAM_TRAITOR and target:GetSubRole() == ROLE_SPY then
 			return ROLE_TRAITOR, TEAM_TRAITOR
 		end
 	end)
@@ -203,7 +203,7 @@ if SERVER then
 	hook.Add("TTT2CanUseVoiceChat", "TTT2SpyJamTraitorVoice", function(speaker, isTeamVoice)
 
 		-- only jam traitor team voice
-		if not isTeamVoice or not IsValid(speaker) or not speaker:HasTeam(TEAM_TRAITOR) then return end
+		if not isTeamVoice or not IsValid(speaker) or speaker:GetTeam() ~= TEAM_TRAITOR then return end
 
 		-- ToDo prevent team voice overlay from showing on the speaking players screen
 		for _, spy in ipairs(player.GetAll()) do
@@ -280,10 +280,10 @@ if SERVER then
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)
 		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_reveal_true_role:GetBool() then return end
 
-		if IsValid(confirmed) and not confirmed:HasTeam(TEAM_TRAITOR) and confirmed:GetSubRole() ~= ROLE_SPY then return end
+		if IsValid(confirmed) and confirmed:GetTeam() ~= TEAM_TRAITOR and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
 		for _, ply in ipairs(player.GetAll()) do
-			if ply:IsTerror() and ply:Alive() and (ply:HasTeam(TEAM_TRAITOR) or ply:GetSubRole() == ROLE_SPY) then
+			if ply:IsTerror() and ply:Alive() and (ply:GetTeam() == TEAM_TRAITOR or ply:GetSubRole() == ROLE_SPY) then
 				return
 			end
 		end
