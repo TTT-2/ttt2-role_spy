@@ -308,4 +308,10 @@ if SERVER then
 			end
 		end
 	end)
+
+	hook.Add("TTT2CanBeHitmanTarget", "TTT2SpyNoHitmanTarget", function(hitman, ply)
+		if ply:GetSubRole() == ROLE_SPY then
+			return false
+		end
+	end)
 end
