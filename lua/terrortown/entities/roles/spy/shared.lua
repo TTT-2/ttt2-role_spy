@@ -29,50 +29,7 @@ function ROLE:Initialize()
 	roles.SetBaseRole(self, ROLE_INNOCENT)
 end
 
-hook.Add("TTTUlxDynamicRCVars", "TTTUlxDynamicSpyCVars", function(tbl)
-	tbl[ROLE_SPY] = tbl[ROLE_SPY] or {}
-
-	table.insert(tbl[ROLE_SPY], {
-		cvar = "ttt2_spy_fake_buy",
-		checkbox = true,
-		desc = "Spies are only allowed to fake purchases (Def. 1)"}
-	)
-
-	table.insert(tbl[ROLE_SPY], {
-		cvar = "ttt2_spy_confirm_as_traitor",
-		checkbox = true,
-		desc = "Spies will be confirmed as traitor (Def. 1)"
-	})
-
-	table.insert(tbl[ROLE_SPY], {
-		cvar = "ttt2_spy_reveal_true_role",
-		checkbox = true,
-		desc = "Spies role will be revealed after every traitors death (Def. 1)"
-	})
-
-	table.insert(tbl[ROLE_SPY], {
-		cvar = "ttt2_spy_jam_special_roles",
-		checkbox = true,
-		desc = "Spies role will jam special traitor roles, special roles will be displayed as normal traitors (Def. 1)"
-	})
-
-	table.insert(tbl[ROLE_SPY], {
-		cvar = "ttt2_spy_survival_bonus",
-		slider = true,
-		min = 0,
-		max = 10,
-		decimal = 0,
-		desc = "The bonus received for surviving a round (Def. 3)"
-	})
-end)
-
 if SERVER then
-	local ttt2_spy_fake_buy = CreateConVar("ttt2_spy_fake_buy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	local ttt2_spy_confirm_as_traitor = CreateConVar("ttt2_spy_confirm_as_traitor", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	local ttt2_spy_reveal_true_role = CreateConVar("ttt2_spy_reveal_true_role", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	local ttt2_spy_jam_special_roles = CreateConVar("ttt2_spy_jam_special_roles", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-	CreateConVar("ttt2_spy_survival_bonus", "3", {FCVAR_ARCHIVE, FCVAR_NOTIFY})
-
 	-- TODO combine next two hooks
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleSpyMod", function(ply, tbl)
 		if ply and ply:GetTeam() ~= TEAM_TRAITOR or ply:GetSubRoleData().unknownTeam or GetRoundState() == ROUND_POST then return end
@@ -87,7 +44,7 @@ if SERVER then
 			end
 		end
 
-		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
+		if not spySelected or not GetConVar("ttt2_spy_jam_special_roles"):GetBool() then return end
 
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
@@ -100,10 +57,10 @@ if SERVER then
 
 	-- we need this hook to secure that dead spies/traitors doesn't get revealed if someone calls SendFullStateUpdate()
 	hook.Add("TTT2SpecialRoleSyncing", "TTT2RoleDeadSpyMod", function(ply, tbl)
-		if not ttt2_spy_confirm_as_traitor:GetBool() or GetRoundState() == ROUND_POST then return end
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or GetRoundState() == ROUND_POST then return end
 
 		--check if traitors are dead and reveal
-		if ttt2_spy_reveal_true_role:GetBool() then
+		if GetConVar("ttt2_spy_reveal_true_role"):GetBool() then
 			local traitor_alive = false
 
 			for tr in pairs(tbl) do
@@ -127,7 +84,7 @@ if SERVER then
 			end
 		end
 
-		if not spySelected or not ttt2_spy_jam_special_roles:GetBool() then return end
+		if not spySelected or not GetConVar("ttt2_spy_jam_special_roles"):GetBool() then return end
 
 		for traitor in pairs(tbl) do
 			if traitor == ply then continue end
@@ -139,7 +96,7 @@ if SERVER then
 	end)
 
 	hook.Add("TTT2OverrideDisabledSync", "TTT2ModifyTraitorRoles4Spy", function(ply, target)
-		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_jam_special_roles:GetBool() or GetRoundState() == ROUND_POST then return end
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_jam_special_roles"):GetBool() or GetRoundState() == ROUND_POST then return end
 
 		local plys = player.GetAll()
 		local spySelected = false
@@ -216,7 +173,7 @@ if SERVER then
 	end)
 
 	hook.Add("TTTCanOrderEquipment", "TTT2SpyCanOrderEquipment", function(spy, id)
-		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY and ttt2_spy_fake_buy:GetBool() then
+		if spy:GetSubRole() and spy:GetSubRole() == ROLE_SPY and GetConVar("ttt2_spy_fake_buy"):GetBool() then
 			if util.NetworkStringToID("TEBN_ItemBought") ~= 0 then
 				local is_item = items.IsItem(id)
 
@@ -255,9 +212,9 @@ if SERVER then
 
 		if not spySelected then return end
 
-		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
 
-		if corpse and (corpse.was_role == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and roles.GetByIndex(corpse.was_role):GetBaseRole() == ROLE_TRAITOR) and not corpse.reverted_spy then
+		if corpse and (corpse.was_role == ROLE_SPY or GetConVar("ttt2_spy_jam_special_roles"):GetBool() and roles.GetByIndex(corpse.was_role):GetBaseRole() == ROLE_TRAITOR) and not corpse.reverted_spy then
 			corpse.was_role = ROLE_TRAITOR
 			corpse.was_team = TEAM_TRAITOR
 			corpse.role_color = TRAITOR.color
@@ -266,7 +223,7 @@ if SERVER then
 	end)
 
 	hook.Add("TTT2ConfirmPlayer", "TTT2SpyChangeRoleToTraitor", function(confirmed, finder, corpse)
-		if not ttt2_spy_confirm_as_traitor:GetBool() then return end
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() then return end
 
 		if IsValid(confirmed) and corpse and corpse.is_spy_corpse then
 			confirmed:ConfirmPlayer(true)
@@ -278,7 +235,7 @@ if SERVER then
 	end)
 
 	hook.Add("TTTBodyFound", "TTT2SpyGetRoleBackIfLastTraitor", function(_, confirmed, corpse)
-		if not ttt2_spy_confirm_as_traitor:GetBool() or not ttt2_spy_reveal_true_role:GetBool() then return end
+		if not GetConVar("ttt2_spy_confirm_as_traitor"):GetBool() or not GetConVar("ttt2_spy_reveal_true_role"):GetBool() then return end
 
 		if IsValid(confirmed) and confirmed:GetTeam() ~= TEAM_TRAITOR and confirmed:GetSubRole() ~= ROLE_SPY then return end
 
@@ -293,7 +250,7 @@ if SERVER then
 
 			if not ply_corpse or not ply:GetNWBool("body_found", false) then continue end
 
-			if ply:GetSubRole() == ROLE_SPY or ttt2_spy_jam_special_roles:GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
+			if ply:GetSubRole() == ROLE_SPY or GetConVar("ttt2_spy_jam_special_roles"):GetBool() and ply:GetBaseRole() == ROLE_TRAITOR then
 				local subrole = ply:GetSubRole()
 				local team = ply:GetTeam()
 				local srd = ply:GetSubRoleData()
@@ -314,4 +271,39 @@ if SERVER then
 			return false
 		end
 	end)
+end
+
+
+if CLIENT then
+	function ROLE:AddToSettingsMenu(parent)
+		local form = vgui.CreateTTT2Form(parent, "header_roles_additional")
+
+		form:MakeCheckBox({
+			serverConvar = "ttt2_spy_fake_buy",
+			label = "label_spy_fake_buy"
+		})
+
+		form:MakeCheckBox({
+			serverConvar = "ttt2_spy_confirm_as_traitor",
+			label = "label_spy_confirm_as_traitor"
+		})
+
+		form:MakeCheckBox({
+			serverConvar = "ttt2_spy_reveal_true_role",
+			label = "label_spy_reveal_true_role"
+		})
+
+		form:MakeCheckBox({
+			serverConvar = "ttt2_spy_jam_special_roles",
+			label = "label_spy_jam_special_roles"
+		})
+
+		form:MakeSlider({
+			serverConvar = "ttt2_spy_survival_bonus",
+			label = "label_spy_survival_bonus",
+			min = 0,
+			max = 10,
+			decimal = 0
+		})
+	end
 end
