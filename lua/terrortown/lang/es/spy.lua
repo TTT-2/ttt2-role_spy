@@ -18,3 +18,9 @@ L["ttt2_fakebuy_success_" .. SPY.name] = "¡Has hecho una compra falsa con éxit
 --L["spy_alive_score"] = "Spy alive:"
 --L["title_event_spy_alive"] = "Spy survived"
 --L["desc_event_spy_alive"] = "The Spy has survived the round and tricked the Traitors."
+
+--L["label_spy_fake_buy"] = "Spies are only allowed to fake purchases"
+--L["label_spy_confirm_as_traitor"] = "Spies will be confirmed as traitor"
+--L["label_spy_reveal_true_role"] = "Spy's role will be revealed after every traitor dies"
+--L["label_spy_jam_special_roles"] = "Special traitors will be displayed as normal traitors"
+--L["label_spy_survival_bonus"] = "The bonus received for surviving a round"
