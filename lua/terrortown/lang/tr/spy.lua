@@ -1,7 +1,7 @@
 local L = LANG.GetLanguageTableReference("tr")
 
 -- GENERAL ROLE LANGUAGE STRINGS
-L[SPY.name] = "Spy"
+L[SPY.name] = "Casus"
 L["info_popup_" .. SPY.name] = [[Casussun! Casus masum takımında oynar ama hainleri kandırmak için müttefikleri olarak görünürler.]]
 L["body_found_" .. SPY.abbr] = "Onlar bir Casustu!"
 L["search_role_" .. SPY.abbr] = "Bu kişi bir Casustu!"
