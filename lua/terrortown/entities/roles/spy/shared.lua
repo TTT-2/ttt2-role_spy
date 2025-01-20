@@ -180,7 +180,7 @@ if SERVER then
 				local traitors = {}
 
 				for _, ply in ipairs(player.GetAll()) do
-					if ply:IsActive() and ply:IsTraitor() then
+					if ply:IsActive() and ply:IsTraitor() and not ply:GetSubRoleData().unknownTeam then
 						traitors[#traitors + 1] = ply
 					end
 				end
